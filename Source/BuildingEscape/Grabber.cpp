@@ -20,6 +20,11 @@ void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
 	PlayerController = GetWorld()->GetFirstPlayerController();
+
+	if (!PlayerController) {
+		UE_LOG(LogTemp, Warning, TEXT("Player controller not found"))
+	}
+
 	FindPhysicsHandleComponent();
 	SetupInputComponent();
 }
@@ -27,10 +32,7 @@ void UGrabber::BeginPlay()
 void UGrabber::FindPhysicsHandleComponent() 
 {
 	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
-	if (PhysicsHandle) {
-
-	}
-	else {
+	if (!PhysicsHandle) {
 		UE_LOG(LogTemp, Error, TEXT("%s missing physics handle component"), *GetOwner()->GetName())
 	}
 }
@@ -52,6 +54,10 @@ void UGrabber::Grab()
 	auto ComponentToGrab = HitResult.GetComponent();
 	auto ActorHit = HitResult.GetActor();
 
+	if (!PhysicsHandle) {
+		return;
+	}
+
 	if (ActorHit)
 	{
 		PhysicsHandle->GrabComponentAtLocation(
@@ -64,6 +70,9 @@ void UGrabber::Grab()
 
 void UGrabber::Release() 
 {
+	if (!PhysicsHandle) {
+		return;
+	}
 	if (PhysicsHandle->GrabbedComponent)
 	{
 		PhysicsHandle->ReleaseComponent();
@@ -74,6 +83,10 @@ void UGrabber::Release()
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (!PhysicsHandle || !PlayerController) {
+		return;
+	}
 
 	if (PhysicsHandle->GrabbedComponent)
 	{
@@ -91,6 +104,11 @@ const FHitResult UGrabber::GetFirstPhysicsBodyWithinReach()
 {
 	FVector PlayerViewPointLocation;
 	FRotator PlayerViewPointRotation;
+
+	if (!PlayerController)
+	{
+		return FHitResult();
+	}
 
 	PlayerController->GetPlayerViewPoint(OUT PlayerViewPointLocation, OUT PlayerViewPointRotation);
 

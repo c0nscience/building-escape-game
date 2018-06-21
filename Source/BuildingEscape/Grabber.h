@@ -30,7 +30,7 @@ private:
 
 	float Reach = 100.f;
 
-	APlayerController* PlayerController;
+	APlayerController* PlayerController = nullptr;
 	
 	UPhysicsHandleComponent* PhysicsHandle = nullptr;
 
